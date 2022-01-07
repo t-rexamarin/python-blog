@@ -25,7 +25,7 @@
     </div>
 
     <hr>
-    <a class="btn btn-default" href="{% url 'mainapp:add_comment_to_post' pk=post.pk %}">Add comment</a>
+    <a class="btn btn-default" href="{% url 'commentsapp:add_comment_to_post' pk=post.pk %}">Add comment</a>
 
     {% for comment in post.comments.all %}
         {% if user.is_authenticated or comment.approved_comment %}
@@ -33,9 +33,9 @@
             <div class="date">
                 {{ comment.created_date }}
                     {% if not comment.approved_comment %}
-                        <a class="btn btn-default" href="{% url 'mainapp:comment_remove' pk=comment.pk %}"><span
+                        <a class="btn btn-default" href="{% url 'commentsapp:comment_remove' pk=comment.pk %}"><span
                                 class="glyphicon glyphicon-remove"></span></a>
-                        <a class="btn btn-default" href="{% url 'mainapp:comment_approve' pk=comment.pk %}"><span
+                        <a class="btn btn-default" href="{% url 'commentsapp:comment_approve' pk=comment.pk %}"><span
                                 class="glyphicon glyphicon-ok"></span></a>
                     {% endif %}
             </div>

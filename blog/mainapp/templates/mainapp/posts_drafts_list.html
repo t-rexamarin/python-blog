@@ -1,7 +1,7 @@
 {% extends 'mainapp/base.html' %}
 
 {% block content %}
-    {% for post in posts %}
+    {% for post in object_list %}
         <div class="post">
             <p class="date">created: {{ post.created_at|date:'d-m-Y' }}</p>
             <h1><a href="{% url 'mainapp:post_detail' pk=post.pk %}">{{ post.title }}</a></h1>

@@ -1,7 +1,11 @@
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, get_object_or_404, redirect
+from django.urls import reverse_lazy, reverse
+from django.views.generic import CreateView, UpdateView
+from django.utils.translation import gettext as _
 from commentsapp.forms import CommentForm
 from commentsapp.models import Comment
+from mainapp.mixin import BaseClassContextMixin
 from mainapp.models import Post
 
 
@@ -21,15 +25,38 @@ def add_comment_to_post(request, pk):
     return render(request, 'commentsapp/add_comment_to_post.html', {'form': form})
 
 
-@login_required
-def comment_approve(request, pk):
-    comment = get_object_or_404(Comment, pk=pk)
-    comment.approve()
-    return redirect('mainapp:post_detail', pk=comment.post.pk)
+class CommentCreateView(CreateView, BaseClassContextMixin):
+    model = Comment
+    title = _('Add comment')
+    template_name = 'commentsapp/add_comment_to_post.html'
+    form_class = CommentForm
+    success_url = 'mainapp:post_detail'
+
+    def form_valid(self, form, *args, **kwargs):
+        comment = form.save(commit=False)
+        comment.post_id = self.kwargs['pk']
+        comment.save()
+        return super(CommentCreateView, self).form_valid(form)
+
+    def get_success_url(self):
+        """
+        if success redirect to created post view
+        @return:
+        @rtype:
+        """
+        return reverse(self.success_url, args=(self.kwargs['pk'],))
 
 
-@login_required
-def comment_remove(request, pk):
-    comment = get_object_or_404(Comment, pk=pk)
-    comment.delete()
-    return redirect('mainapp:post_detail', pk=comment.post.pk)
+class CommentUpdateView(UpdateView, BaseClassContextMixin):
+    model = Comment
+    template_name = 'mainapp:post_detail'
+
+    def comment_approve(self, *args, **kwargs):
+        comment = get_object_or_404(Comment, pk=kwargs['pk'])
+        comment.approve()
+        return redirect('mainapp:post_detail', pk=comment.post.pk)
+
+    def comment_remove(self, *args, **kwargs):
+        comment = get_object_or_404(Comment, pk=kwargs['pk'])
+        comment.delete()
+        return redirect('mainapp:post_detail', pk=comment.post.pk)
